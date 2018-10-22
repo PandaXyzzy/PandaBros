@@ -1,0 +1,83 @@
+
+pandaPanda.png
+size: 512,256
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+Panda_Mushroom
+  rotate: false
+  xy: 2, 76
+  size: 200, 178
+  orig: 200, 178
+  offset: 0, 0
+  index: -1
+RIP
+  rotate: false
+  xy: 2, 52
+  size: 116, 22
+  orig: 116, 22
+  offset: 0, 0
+  index: -1
+bigPandaStand
+  rotate: false
+  xy: 204, 123
+  size: 17, 34
+  orig: 17, 34
+  offset: 0, 0
+  index: -1
+bigWalk
+  rotate: false
+  xy: 204, 220
+  size: 102, 34
+  orig: 102, 34
+  offset: 0, 0
+  index: -1
+fireball
+  rotate: false
+  xy: 308, 222
+  size: 32, 8
+  orig: 32, 8
+  offset: 0, 0
+  index: -1
+goomba
+  rotate: false
+  xy: 120, 58
+  size: 48, 16
+  orig: 48, 16
+  offset: 0, 0
+  index: -1
+grow
+  rotate: false
+  xy: 204, 159
+  size: 36, 34
+  orig: 36, 34
+  offset: 0, 0
+  index: -1
+jump
+  rotate: false
+  xy: 308, 232
+  size: 87, 22
+  orig: 87, 22
+  offset: 0, 0
+  index: -1
+stand
+  rotate: false
+  xy: 204, 195
+  size: 87, 23
+  orig: 87, 23
+  offset: 0, 0
+  index: -1
+turtle
+  rotate: false
+  xy: 2, 2
+  size: 96, 24
+  orig: 96, 24
+  offset: 0, 0
+  index: -1
+walk
+  rotate: false
+  xy: 2, 28
+  size: 102, 22
+  orig: 102, 22
+  offset: 0, 0
+  index: -1
