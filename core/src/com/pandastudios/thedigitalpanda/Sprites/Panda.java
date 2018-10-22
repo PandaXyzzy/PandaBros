@@ -1,5 +1,6 @@
 package com.pandastudios.thedigitalpanda.Sprites;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -18,11 +19,12 @@ import com.pandastudios.thedigitalpanda.Tools.Manager;
 
 public class Panda extends Sprite {
     public enum State {FALLING, JUMPING, STANDING, RUNNING, GROWING, RIP }
-    public State currentState;
-    public State previousState;
+    private State currentState;
+    private State previousState;
     public World world;
     public Body b2Body;
     public Manager manager;
+    private float stateTime;
     private Animation<TextureRegion> pandaStand;
     private Animation<TextureRegion> pandaRun;
     private Animation<TextureRegion> pandaJump;
@@ -37,7 +39,6 @@ public class Panda extends Sprite {
     private boolean runGrowAnimation;
     private boolean timeToDefineBigPanda;
     private boolean timeToRedefinePanda;
-    private boolean timeForInvulnPanda;
     private boolean pandaIsRIP;
 
 
@@ -90,7 +91,7 @@ public class Panda extends Sprite {
         frames.clear();//clear for RIP
 
         for (int i = 0; i < 7; i++)
-            frames.add(new TextureRegion(screen.getAtlas().findRegion("RIP"), i * 0, 0, 17, 22));
+            frames.add(new TextureRegion(screen.getAtlas().findRegion("RIP"), 0, 0, 17, 22));
         pandaRIP = new Animation(1f, frames);
 
 
@@ -105,14 +106,14 @@ public class Panda extends Sprite {
 
 
     public void update(float dt) {
+        stateTime += dt;
         setPosition(b2Body.getPosition().x - getWidth() / (float) 2, b2Body.getPosition().y - getHeight() / ((float) 2.7));
         setRegion(getFrame(dt));
         if (timeToDefineBigPanda) {defineBigPanda();}
-        if (timeToRedefinePanda){redefinePanda();}
-        if (timeForInvulnPanda){defineInvulnPanda();}
+        if (timeToRedefinePanda){redefinePanda(); stateTime=0;}
     }
 
-    public TextureRegion getFrame(float dt){
+    private TextureRegion getFrame(float dt){
         currentState = getState();
 
         TextureRegion region;
@@ -153,7 +154,7 @@ public class Panda extends Sprite {
         return region;
     }
 
-    public State getState(){
+    private State getState(){
         if (pandaIsRIP)
             return State.RIP;
         else if (runGrowAnimation)
@@ -177,7 +178,6 @@ public class Panda extends Sprite {
 
     public void hit(){
         if (isBig){ isBig = false;
-        timeForInvulnPanda = true;
         manager.aManager.get(Manager.powerdown).play();
         setBounds(getX(), getY(), getWidth(), getHeight()/(float)1.353);
             System.out.println("panda got small");
@@ -187,9 +187,9 @@ public class Panda extends Sprite {
         setRegion(pandaStand.getKeyFrame(stateTimer,true));
     }
 
-    public boolean isRIP(){return pandaIsRIP;}
+    private boolean isRIP(){return pandaIsRIP;}
 
-    public void die() {
+    private void die() {
         if (!isRIP()) {
             manager.aManager.get(manager.music).stop();
             manager.aManager.get(Manager.RIP).play();
@@ -208,7 +208,8 @@ public class Panda extends Sprite {
     }
 
 
-    public void defineInvulnPanda(){
+
+    private void redefinePanda(){
         //store current location of body
         Vector2 position = b2Body.getPosition();
         //destroy body
@@ -225,56 +226,22 @@ public class Panda extends Sprite {
         shape.setAsBox(4/PandaBros.PPM, 4/PandaBros.PPM);
         fDef.filter.categoryBits = PandaBros.PANDA_BIT;
 
-        fDef.filter.maskBits = PandaBros.GROUND_BIT |
+        if (stateTime < 1){
+            fDef.filter.maskBits = PandaBros.GROUND_BIT |
                 PandaBros.BRICK_BIT |
                 PandaBros.COIN_BIT |
-                PandaBros.ENEMY_BIT |
                 PandaBros.OBJECT_BIT |
-                PandaBros.ENEMY_HEAD_BIT|
-                PandaBros.ITEM_BIT;
+                PandaBros.ITEM_BIT;}
+                else {
 
-        fDef.shape = shape;
-        b2Body.createFixture(fDef).setUserData(this);
-
-        //create head
-        EdgeShape head = new EdgeShape(); //// change 6 to other number to figure out scale
-        head.set(new Vector2(-2/PandaBros.PPM,4/ PandaBros.PPM), new Vector2(2/PandaBros.PPM, 4/ PandaBros.PPM));
-        fDef.shape = head;
-        fDef.filter.categoryBits = PandaBros.PANDA_HEAD_BIT;
-        fDef.isSensor = true;
-
-        b2Body.createFixture(fDef).setUserData(this);
-        //dont repeat this
-        timeForInvulnPanda = false;
-        timeToRedefinePanda = true;
-    }
-
-
-
-    public void redefinePanda(){
-        //store current location of body
-        Vector2 position = b2Body.getPosition();
-        //destroy body
-        world.destroyBody(b2Body);
-
-        //create new body
-        BodyDef bDef = new BodyDef();
-        bDef.position.set(position);
-        bDef.type = BodyDef.BodyType.DynamicBody;
-        b2Body = world.createBody(bDef);
-
-        FixtureDef fDef = new FixtureDef();
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(4/PandaBros.PPM, 4/PandaBros.PPM);
-        fDef.filter.categoryBits = PandaBros.PANDA_BIT;
-
-        fDef.filter.maskBits = PandaBros.GROUND_BIT |
-                PandaBros.BRICK_BIT |
-                PandaBros.COIN_BIT |
-                PandaBros.ENEMY_BIT |
-                PandaBros.OBJECT_BIT |
-                PandaBros.ENEMY_HEAD_BIT|
-                PandaBros.ITEM_BIT;
+            fDef.filter.maskBits = PandaBros.GROUND_BIT |
+                    PandaBros.BRICK_BIT |
+                    PandaBros.COIN_BIT |
+                    PandaBros.ENEMY_BIT |
+                    PandaBros.OBJECT_BIT |
+                    PandaBros.ENEMY_HEAD_BIT |
+                    PandaBros.ITEM_BIT;
+        }
 
         fDef.shape = shape;
         b2Body.createFixture(fDef).setUserData(this);
@@ -291,7 +258,7 @@ public class Panda extends Sprite {
         timeToRedefinePanda = false;
     }
 
-    protected void defineBigPanda(){
+    private void defineBigPanda(){
         Vector2 currentPosition = b2Body.getPosition();
         world.destroyBody(b2Body);
 
@@ -326,7 +293,7 @@ public class Panda extends Sprite {
 
     }
 
-public void definePanda(){
+private void definePanda(){
     BodyDef bDef = new BodyDef();
     bDef.position.set(32 / PandaBros.PPM,32/PandaBros.PPM);
     bDef.type = BodyDef.BodyType.DynamicBody;

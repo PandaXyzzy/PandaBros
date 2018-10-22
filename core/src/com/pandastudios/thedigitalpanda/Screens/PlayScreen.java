@@ -116,7 +116,7 @@ public class PlayScreen implements Screen{
     public void spawnItem(ItemDef idef){
         itemsToSpawn.add(idef);
     }
-    public void handleSpawningItems(){
+    private void handleSpawningItems(){
         if (!itemsToSpawn.isEmpty()){
             ItemDef idef = itemsToSpawn.poll();
             if(idef.type == Mushroom.class){
@@ -135,7 +135,7 @@ public class PlayScreen implements Screen{
 
     }
 
-    public void handleinput(float dt){
+    private void handleinput(float dt){
 
         if(controller.isUpPressed() || controller.isbPressed()) {
             playerPanda.b2Body.applyLinearImpulse(new Vector2(0, 0.7f), playerPanda.b2Body.getWorldCenter(), true);
@@ -149,7 +149,8 @@ public class PlayScreen implements Screen{
     }
 
 
-    public void update(float dt){
+
+    private void update(float dt){
         handleinput(dt);
         handleSpawningItems();
 
