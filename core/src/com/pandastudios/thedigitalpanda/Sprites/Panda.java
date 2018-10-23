@@ -1,6 +1,5 @@
 package com.pandastudios.thedigitalpanda.Sprites;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -40,6 +39,7 @@ public class Panda extends Sprite {
     private boolean timeToDefineBigPanda;
     private boolean timeToRedefinePanda;
     private boolean pandaIsRIP;
+    private boolean timeToDefineInvulnPanda;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -105,12 +105,20 @@ public class Panda extends Sprite {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    public void update(float dt) {
-        stateTime += dt;
-        setPosition(b2Body.getPosition().x - getWidth() / (float) 2, b2Body.getPosition().y - getHeight() / ((float) 2.7));
-        setRegion(getFrame(dt));
-        if (timeToDefineBigPanda) {defineBigPanda();}
-        if (timeToRedefinePanda){redefinePanda(); stateTime=0;}
+
+    private State getState(){
+        if (pandaIsRIP)
+            return State.RIP;
+        else if (runGrowAnimation)
+            return State.GROWING;
+        else if (b2Body.getLinearVelocity().y > 0 || (b2Body.getLinearVelocity().y < 0 && previousState == State.JUMPING))
+            return State.JUMPING;
+        else if (b2Body.getLinearVelocity().y < 0)
+            return State.FALLING;
+        else if (b2Body.getLinearVelocity().x !=0)
+            return State.RUNNING;
+        else
+            return State.STANDING;
     }
 
     private TextureRegion getFrame(float dt){
@@ -154,32 +162,22 @@ public class Panda extends Sprite {
         return region;
     }
 
-    private State getState(){
-        if (pandaIsRIP)
-            return State.RIP;
-        else if (runGrowAnimation)
-            return State.GROWING;
-        else if (b2Body.getLinearVelocity().y > 0 || (b2Body.getLinearVelocity().y < 0 && previousState == State.JUMPING))
-            return State.JUMPING;
-        else if (b2Body.getLinearVelocity().y < 0)
-            return State.FALLING;
-        else if (b2Body.getLinearVelocity().x !=0)
-            return State.RUNNING;
-        else
-            return State.STANDING;
-    }
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     public void grow(){
         runGrowAnimation = true;
         isBig = true;
         timeToDefineBigPanda = true;
-        setBounds(getX(), getY(), getWidth(), getHeight()*(float) 1.647);
+        setBounds(getX(), getY(), getWidth(), getHeight() + 12/PandaBros.PPM);
     }
 
     public void hit(){
         if (isBig){ isBig = false;
+        stateTime = 0;
+        timeToDefineInvulnPanda = true;
         manager.aManager.get(Manager.powerdown).play();
-        setBounds(getX(), getY(), getWidth(), getHeight()/(float)1.353);
+        setBounds(getX(), getY(), getWidth(), getHeight() - 12/PandaBros.PPM);
             System.out.println("panda got small");
         }
         //if panda is small
@@ -207,55 +205,56 @@ public class Panda extends Sprite {
         }
     }
 
+    /////////////////////// stuff////////////////////////////////////////////////////////////////
 
 
-    private void redefinePanda(){
-        //store current location of body
-        Vector2 position = b2Body.getPosition();
-        //destroy body
-        world.destroyBody(b2Body);
 
-        //create new body
-        BodyDef bDef = new BodyDef();
-        bDef.position.set(position);
-        bDef.type = BodyDef.BodyType.DynamicBody;
-        b2Body = world.createBody(bDef);
 
-        FixtureDef fDef = new FixtureDef();
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(4/PandaBros.PPM, 4/PandaBros.PPM);
-        fDef.filter.categoryBits = PandaBros.PANDA_BIT;
+    public void update(float dt) {
+        stateTime += dt;
+        setPosition(b2Body.getPosition().x - getWidth() / (float) 2, b2Body.getPosition().y - getHeight() / ((float) 2.7));
+        setRegion(getFrame(dt));
 
-        if (stateTime < 1){
-            fDef.filter.maskBits = PandaBros.GROUND_BIT |
-                PandaBros.BRICK_BIT |
-                PandaBros.COIN_BIT |
-                PandaBros.OBJECT_BIT |
-                PandaBros.ITEM_BIT;}
-                else {
+        if (timeToDefineBigPanda) {defineBigPanda();}
+        if (timeToDefineInvulnPanda){stateTime = 0; godModePanda(); }
+        if (timeToRedefinePanda){
+            while (stateTime < 3){return; }
 
-            fDef.filter.maskBits = PandaBros.GROUND_BIT |
-                    PandaBros.BRICK_BIT |
-                    PandaBros.COIN_BIT |
-                    PandaBros.ENEMY_BIT |
-                    PandaBros.OBJECT_BIT |
-                    PandaBros.ENEMY_HEAD_BIT |
-                    PandaBros.ITEM_BIT;
+            {redefinePanda();}
         }
+    }
 
-        fDef.shape = shape;
-        b2Body.createFixture(fDef).setUserData(this);
+    ///////////////////// Define methods //////////////////////////////////////////////////////////
 
-        //create head
-        EdgeShape head = new EdgeShape(); //// change 6 to other number to figure out scale
-        head.set(new Vector2(-2/PandaBros.PPM,4/ PandaBros.PPM), new Vector2(2/PandaBros.PPM, 4/ PandaBros.PPM));
-        fDef.shape = head;
-        fDef.filter.categoryBits = PandaBros.PANDA_HEAD_BIT;
-        fDef.isSensor = true;
+    private void definePanda(){
+    BodyDef bDef = new BodyDef();
+    bDef.position.set(32 / PandaBros.PPM,32/PandaBros.PPM);
+    bDef.type = BodyDef.BodyType.DynamicBody;
+    b2Body = world.createBody(bDef);
 
-        b2Body.createFixture(fDef).setUserData(this);
-        //dont repeat this
-        timeToRedefinePanda = false;
+    FixtureDef fDef = new FixtureDef();
+    PolygonShape shape = new PolygonShape();
+    shape.setAsBox(4/PandaBros.PPM, 4/PandaBros.PPM);
+    fDef.filter.categoryBits = PandaBros.PANDA_BIT;
+    fDef.filter.maskBits = PandaBros.GROUND_BIT |
+            PandaBros.BRICK_BIT |
+            PandaBros.COIN_BIT |
+            PandaBros.ENEMY_BIT |
+            PandaBros.OBJECT_BIT |
+            PandaBros.ENEMY_HEAD_BIT|
+            PandaBros.ITEM_BIT;
+
+    fDef.shape = shape;
+    b2Body.createFixture(fDef).setUserData(this);
+
+
+    EdgeShape head = new EdgeShape(); //// change 6 to other number to figure out scale
+    head.set(new Vector2(-2/PandaBros.PPM,4/ PandaBros.PPM), new Vector2(2/PandaBros.PPM, 4/ PandaBros.PPM));
+    fDef.shape = head;
+    fDef.filter.categoryBits = PandaBros.PANDA_HEAD_BIT;
+    fDef.isSensor = true;
+
+    b2Body.createFixture(fDef).setUserData(this);
     }
 
     private void defineBigPanda(){
@@ -263,7 +262,7 @@ public class Panda extends Sprite {
         world.destroyBody(b2Body);
 
         BodyDef bDef = new BodyDef();
-        bDef.position.set(currentPosition.add(0,8/PandaBros.PPM));
+        bDef.position.set(currentPosition);
         bDef.type = BodyDef.BodyType.DynamicBody;
         b2Body = world.createBody(bDef);
 
@@ -293,35 +292,92 @@ public class Panda extends Sprite {
 
     }
 
-private void definePanda(){
-    BodyDef bDef = new BodyDef();
-    bDef.position.set(32 / PandaBros.PPM,32/PandaBros.PPM);
-    bDef.type = BodyDef.BodyType.DynamicBody;
-    b2Body = world.createBody(bDef);
-
-    FixtureDef fDef = new FixtureDef();
-    PolygonShape shape = new PolygonShape();
-    shape.setAsBox(4/PandaBros.PPM, 4/PandaBros.PPM);
-    fDef.filter.categoryBits = PandaBros.PANDA_BIT;
-    fDef.filter.maskBits = PandaBros.GROUND_BIT |
-            PandaBros.BRICK_BIT |
-            PandaBros.COIN_BIT |
-            PandaBros.ENEMY_BIT |
-            PandaBros.OBJECT_BIT |
-            PandaBros.ENEMY_HEAD_BIT|
-            PandaBros.ITEM_BIT;
-
-    fDef.shape = shape;
-    b2Body.createFixture(fDef).setUserData(this);
+    private  void godModePanda() {
+        //store current location of body
+        Vector2 position = b2Body.getPosition();
+        //destroy body
+        world.destroyBody(b2Body);
 
 
-    EdgeShape head = new EdgeShape(); //// change 6 to other number to figure out scale
-    head.set(new Vector2(-2/PandaBros.PPM,4/ PandaBros.PPM), new Vector2(2/PandaBros.PPM, 4/ PandaBros.PPM));
-    fDef.shape = head;
-    fDef.filter.categoryBits = PandaBros.PANDA_HEAD_BIT;
-    fDef.isSensor = true;
+        //create new body
+        BodyDef bDef = new BodyDef();
+        bDef.position.set(position);
+        bDef.type = BodyDef.BodyType.DynamicBody;
+        b2Body = world.createBody(bDef);
 
-    b2Body.createFixture(fDef).setUserData(this);
+        FixtureDef fDef = new FixtureDef();
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(4 / PandaBros.PPM, 4 / PandaBros.PPM);
+        fDef.shape = shape;
+        b2Body.createFixture(fDef).setUserData(this);
+
+        fDef.filter.maskBits = PandaBros.GROUND_BIT |
+                PandaBros.BRICK_BIT |
+                PandaBros.COIN_BIT |
+                PandaBros.ENEMY_BIT |
+                PandaBros. ENEMY_HEAD_BIT|
+                PandaBros.ITEM_BIT;
+
+
+        //create head
+        EdgeShape head = new EdgeShape(); //// change 6 to other number to figure out scale
+        head.set(new Vector2(-2 / PandaBros.PPM, 4 / PandaBros.PPM), new Vector2(2 / PandaBros.PPM, 4 / PandaBros.PPM));
+        fDef.shape = head;
+        fDef.filter.categoryBits = PandaBros.PANDA_HEAD_BIT;
+        fDef.isSensor = true;
+
+        b2Body.createFixture(fDef).setUserData(this);
+        //dont repeat this
+
+
+            timeToDefineInvulnPanda = false;
+            timeToRedefinePanda = true;
+    }
+
+    private void redefinePanda(){
+        //store current location of body
+        Vector2 position = b2Body.getPosition();
+        //destroy body
+        world.destroyBody(b2Body);
+
+        manager.aManager.get(manager.music).stop();
+
+
+
+        //create new body
+        BodyDef bDef = new BodyDef();
+        bDef.position.set(position);
+        bDef.type = BodyDef.BodyType.DynamicBody;
+        b2Body = world.createBody(bDef);
+
+        FixtureDef fDef = new FixtureDef();
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(4/PandaBros.PPM, 4/PandaBros.PPM);
+        fDef.filter.categoryBits = PandaBros.PANDA_BIT;
+        fDef.shape = shape;
+        b2Body.createFixture(fDef).setUserData(this);
+
+        fDef.filter.maskBits = PandaBros.GROUND_BIT |
+                PandaBros.BRICK_BIT |
+                PandaBros.COIN_BIT |
+                PandaBros.ENEMY_BIT |
+                PandaBros.OBJECT_BIT |
+                PandaBros.ENEMY_HEAD_BIT |
+                PandaBros.ITEM_BIT;
+
+
+
+
+        //create head
+        EdgeShape head = new EdgeShape(); //// change 6 to other number to figure out scale
+        head.set(new Vector2(-2/PandaBros.PPM,4/ PandaBros.PPM), new Vector2(2/PandaBros.PPM, 4/ PandaBros.PPM));
+        fDef.shape = head;
+        fDef.filter.categoryBits = PandaBros.PANDA_HEAD_BIT;
+        fDef.isSensor = true;
+
+        b2Body.createFixture(fDef).setUserData(this);
+        //dont repeat this
+        timeToRedefinePanda = false;
     }
 
 
