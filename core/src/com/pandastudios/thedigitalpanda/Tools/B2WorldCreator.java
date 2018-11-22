@@ -11,6 +11,8 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.pandastudios.thedigitalpanda.Screens.PlayScreen;
+import com.pandastudios.thedigitalpanda.Sprites.Enemies.Enemy;
+import com.pandastudios.thedigitalpanda.Sprites.Enemies.Turtle;
 import com.pandastudios.thedigitalpanda.Sprites.TileObjects.Brick;
 import com.pandastudios.thedigitalpanda.Sprites.TileObjects.Coin;
 import com.pandastudios.thedigitalpanda.PandaBros;
@@ -18,11 +20,8 @@ import com.pandastudios.thedigitalpanda.Sprites.Enemies.Goomba;
 
 public class B2WorldCreator {
     private Array<Goomba> goombas;
+    private Array<Turtle> turtles;
 
-
-    public Array<Goomba> getGoombas() {
-        return goombas;
-    }
 
     public B2WorldCreator(PlayScreen screen, Manager manager){
         World world = screen.getWorld();
@@ -81,5 +80,24 @@ public class B2WorldCreator {
 
             goombas.add(new Goomba(screen, rect.getX() / PandaBros.PPM, rect.getY() / PandaBros.PPM, manager));
         }
+
+        //create all turtles
+        turtles = new Array<Turtle>();
+        for(MapObject object : map.getLayers().get(7).getObjects().getByType(RectangleMapObject.class)) {
+            Rectangle rect = ((RectangleMapObject) object).getRectangle();
+
+            turtles.add(new Turtle(screen, rect.getX() / PandaBros.PPM, rect.getY() / PandaBros.PPM, manager));
+        }
     }
+
+    public Array<Goomba> getGoombas() {return goombas;}
+    public Array<Enemy> getEnemies(){
+        Array<Enemy> enemies = new Array<Enemy>();
+        enemies.addAll(goombas);
+        enemies.addAll(turtles);
+        return enemies;
+    }
+
+
+
 }

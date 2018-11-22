@@ -11,6 +11,7 @@ import com.pandastudios.thedigitalpanda.Scenes.Hud;
 import com.pandastudios.thedigitalpanda.Screens.PlayScreen;
 import com.pandastudios.thedigitalpanda.PandaBros;
 import com.pandastudios.thedigitalpanda.Sprites.Enemies.Enemy;
+import com.pandastudios.thedigitalpanda.Sprites.Panda;
 import com.pandastudios.thedigitalpanda.Tools.Manager;
 
 
@@ -55,6 +56,16 @@ public class Goomba extends Enemy {
             setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
             setRegion(walkAnimation.getKeyFrame(stateTime, true));
         }
+    }
+
+    @Override
+    public void hitByEnemy(Enemy enemy) {
+        
+    }
+
+    public void onEnemyHit(Enemy enemy) {
+        if(enemy instanceof Turtle &&((Turtle)enemy).currentState == Turtle.State.MOVING_SHELL){setToDestroy = true;}
+        else {reverseVelocity(true, false);}
     }
 
     @Override
@@ -103,7 +114,7 @@ public class Goomba extends Enemy {
     }
 
     @Override
-    public void hitOnHead() {
+    public void hitOnHead(Panda panda) {
         setToDestroy = true;
         manager.aManager.get(manager.stomp).play();
         Hud.addScore(1000);

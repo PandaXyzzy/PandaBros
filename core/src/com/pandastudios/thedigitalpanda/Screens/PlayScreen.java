@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.pandastudios.thedigitalpanda.Scenes.Controller;
+import com.pandastudios.thedigitalpanda.Scenes.GameOverScreen;
 import com.pandastudios.thedigitalpanda.Scenes.Hud;
 import com.pandastudios.thedigitalpanda.Sprites.Enemies.Enemy;
 import com.pandastudios.thedigitalpanda.Sprites.Items.Item;
@@ -137,8 +138,8 @@ public class PlayScreen implements Screen{
 
     private void handleinput(float dt){
 
-        if(controller.isUpPressed() || controller.isbPressed()) {
-            playerPanda.b2Body.applyLinearImpulse(new Vector2(0, 0.7f), playerPanda.b2Body.getWorldCenter(), true);
+        if(controller.isUpPressed() || controller.isbPressed() && playerPanda.b2Body.getLinearVelocity().y <=0) {
+            playerPanda.b2Body.applyLinearImpulse(new Vector2(0, 0.5f), playerPanda.b2Body.getWorldCenter(), true);
         }
         if(controller.isRightPressed() && playerPanda.b2Body.getLinearVelocity().x <=2) {
             playerPanda.b2Body.applyLinearImpulse(new Vector2(0.1f, 0), playerPanda.b2Body.getWorldCenter(), true);
@@ -157,11 +158,12 @@ public class PlayScreen implements Screen{
         world.step(1/60f, 6,2);
 
         playerPanda.update(dt);
-        for (Enemy enemy: creator.getGoombas()){
+        for (Enemy enemy: creator.getEnemies()){
             enemy.update(dt);
-                if(enemy.getX() < playerPanda.getX() +224/PandaBros.PPM)
-                    enemy.b2Body.setActive(true);
+            if(enemy.getX() < playerPanda.getX() +224/PandaBros.PPM)
+                enemy.b2Body.setActive(true);
         }
+
 
         for (Item item : items){item.update(dt);}
 
@@ -193,7 +195,7 @@ public class PlayScreen implements Screen{
         game.batch.begin(); //start drawing
 
         playerPanda.draw(game.batch);
-        for (Enemy enemy: creator.getGoombas()){enemy.draw(game.batch);}
+        for (Enemy enemy: creator.getEnemies()){enemy.draw(game.batch);}
         for (Item item : items){item.draw(game.batch);}
 
         game.batch.end();//stop drawing
@@ -203,7 +205,20 @@ public class PlayScreen implements Screen{
         hud.stage.draw();
         controller.draw();
 
+        if (gameOver()){
+            game.setScreen(new GameOverScreen(game));
+            dispose();
+        }
+
     }
+
+    public boolean gameOver() {
+        if (playerPanda.currentState == Panda.State.RIP && playerPanda.getStateTimer() > 3) {
+            return true;
+        }
+        return false;
+    }
+
 
     @Override
     public void resize(int width, int height) {

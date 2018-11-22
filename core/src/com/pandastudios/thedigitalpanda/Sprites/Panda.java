@@ -11,14 +11,17 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 import com.pandastudios.thedigitalpanda.Screens.PlayScreen;
 import com.pandastudios.thedigitalpanda.PandaBros;
+import com.pandastudios.thedigitalpanda.Sprites.Enemies.Enemy;
+import com.pandastudios.thedigitalpanda.Sprites.Enemies.Turtle;
 import com.pandastudios.thedigitalpanda.Tools.Manager;
 
 public class Panda extends Sprite {
     public enum State {FALLING, JUMPING, STANDING, RUNNING, GROWING, RIP }
-    private State currentState;
+    public State currentState;
     private State previousState;
     public World world;
     public Body b2Body;
@@ -39,7 +42,7 @@ public class Panda extends Sprite {
     private boolean timeToDefineBigPanda;
     private boolean timeToRedefinePanda;
     private boolean pandaIsRIP;
-    private boolean timeToDefineInvulnPanda;
+    private boolean timeToDefineGodMode;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,10 +175,12 @@ public class Panda extends Sprite {
         setBounds(getX(), getY(), getWidth(), getHeight() + 12/PandaBros.PPM);
     }
 
-    public void hit(){
+    public void hit(Enemy enemy){
+        if (enemy instanceof Turtle && ((Turtle)enemy).currentState == Turtle.State.STANDING_SHELL){
+            ((Turtle)enemy).kick(this.getX() <= enemy.getX() ? Turtle.KICK_RIGHT : Turtle.KICK_LEFT);
+        }else{
         if (isBig){ isBig = false;
-        stateTime = 0;
-        timeToDefineInvulnPanda = true;
+        timeToDefineGodMode = true;
         manager.aManager.get(Manager.powerdown).play();
         setBounds(getX(), getY(), getWidth(), getHeight() - 12/PandaBros.PPM);
             System.out.println("panda got small");
@@ -183,9 +188,13 @@ public class Panda extends Sprite {
         //if panda is small
         else {die();}
         setRegion(pandaStand.getKeyFrame(stateTimer,true));
-    }
+    }}
 
-    private boolean isRIP(){return pandaIsRIP;}
+    public boolean isRIP(){return pandaIsRIP;}
+
+    public float getStateTimer() {
+        return stateTimer;
+    }
 
     private void die() {
         if (!isRIP()) {
@@ -216,7 +225,7 @@ public class Panda extends Sprite {
         setRegion(getFrame(dt));
 
         if (timeToDefineBigPanda) {defineBigPanda();}
-        if (timeToDefineInvulnPanda){stateTime = 0; godModePanda(); }
+        if (timeToDefineGodMode){stateTime = 0; godModePanda(); }
         if (timeToRedefinePanda){
             while (stateTime < 3){return; }
 
@@ -241,6 +250,7 @@ public class Panda extends Sprite {
             PandaBros.COIN_BIT |
             PandaBros.ENEMY_BIT |
             PandaBros.OBJECT_BIT |
+            PandaBros.WIN_BIT |
             PandaBros.ENEMY_HEAD_BIT|
             PandaBros.ITEM_BIT;
 
@@ -276,6 +286,7 @@ public class Panda extends Sprite {
                 PandaBros.ENEMY_BIT |
                 PandaBros.OBJECT_BIT |
                 PandaBros.ENEMY_HEAD_BIT|
+                PandaBros.WIN_BIT |
                 PandaBros.ITEM_BIT;
 
         fDef.shape = shape;
@@ -330,7 +341,7 @@ public class Panda extends Sprite {
         //dont repeat this
 
 
-            timeToDefineInvulnPanda = false;
+            timeToDefineGodMode = false;
             timeToRedefinePanda = true;
     }
 
@@ -363,6 +374,7 @@ public class Panda extends Sprite {
                 PandaBros.ENEMY_BIT |
                 PandaBros.OBJECT_BIT |
                 PandaBros.ENEMY_HEAD_BIT |
+                PandaBros.WIN_BIT |
                 PandaBros.ITEM_BIT;
 
 

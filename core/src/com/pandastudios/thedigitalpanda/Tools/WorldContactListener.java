@@ -26,12 +26,12 @@ public class WorldContactListener implements ContactListener {
                 if (fixA.getFilterData().categoryBits == PandaBros.PANDA_HEAD_BIT)
                     ((InteractiveTileObject) fixB.getUserData()).onHeadHit((Panda) fixA.getUserData());
                 else
-                    ((InteractiveTileObject) fixB.getUserData()).onHeadHit((Panda) fixB.getUserData());
+                    ((InteractiveTileObject) fixA.getUserData()).onHeadHit((Panda) fixB.getUserData());
                 break;
             case PandaBros.ENEMY_HEAD_BIT | PandaBros.PANDA_BIT:
                 if (fixA.getFilterData().categoryBits == PandaBros.ENEMY_HEAD_BIT)
-                    ((Enemy)fixA.getUserData()).hitOnHead();
-                else ((Enemy)fixB.getUserData()).hitOnHead();
+                    ((Enemy)fixA.getUserData()).hitOnHead((Panda) fixB.getUserData());
+                else ((Enemy)fixB.getUserData()).hitOnHead((Panda) fixA.getUserData());
                 break;
             case PandaBros.ENEMY_BIT | PandaBros.OBJECT_BIT:
                 if (fixA.getFilterData().categoryBits == PandaBros.ENEMY_BIT)
@@ -40,13 +40,13 @@ public class WorldContactListener implements ContactListener {
                 break;
             case PandaBros.PANDA_BIT | PandaBros.ENEMY_BIT://<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 if (fixA.getFilterData().categoryBits == PandaBros.PANDA_BIT)
-                    ((Panda) fixA.getUserData()).hit();
+                    ((Panda) fixA.getUserData()).hit((Enemy)fixB.getUserData());
                 else
-                    ((Panda) fixB.getUserData()).hit();
+                    ((Panda) fixB.getUserData()).hit((Enemy)fixA.getUserData());
                 break;
             case PandaBros.ENEMY_BIT | PandaBros.ENEMY_BIT:
-                ((Enemy)fixA.getUserData()).reverseVelocity(true, false);
-                ((Enemy)fixB.getUserData()).reverseVelocity(true, false);
+                ((Enemy)fixA.getUserData()).onEnemyHit((Enemy)fixB.getUserData());
+                ((Enemy)fixB.getUserData()).onEnemyHit((Enemy)fixA.getUserData());
                 break;
             case PandaBros.ITEM_BIT | PandaBros.OBJECT_BIT:
                 if (fixA.getFilterData().categoryBits == PandaBros.ITEM_BIT)

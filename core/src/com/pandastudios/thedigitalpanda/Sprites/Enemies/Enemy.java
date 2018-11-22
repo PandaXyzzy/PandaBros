@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.pandastudios.thedigitalpanda.Screens.PlayScreen;
+import com.pandastudios.thedigitalpanda.Sprites.Panda;
 
 public abstract class Enemy extends Sprite {
 
@@ -12,6 +13,7 @@ public abstract class Enemy extends Sprite {
     protected PlayScreen screen;
     public Body b2Body;
     public Vector2 velocity;
+    public abstract void onEnemyHit(Enemy enemy);
 
     public Enemy(PlayScreen screen, float x, float y){
         this.world = screen.getWorld();
@@ -24,8 +26,9 @@ public abstract class Enemy extends Sprite {
     }
 
     protected abstract void defineEnemy();
-    public abstract void hitOnHead();
+    public abstract void hitOnHead(Panda panda);
     public abstract void update(float dt);
+    public abstract void hitByEnemy(Enemy enemy);
 
     public void reverseVelocity(boolean x, boolean y){
         if (x)
