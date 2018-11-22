@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.pandastudios.thedigitalpanda.PandaBros;
+import com.pandastudios.thedigitalpanda.Scenes.Hud;
 import com.pandastudios.thedigitalpanda.Screens.PlayScreen;
 import com.pandastudios.thedigitalpanda.Sprites.Panda;
 import com.pandastudios.thedigitalpanda.Tools.Manager;
@@ -45,8 +46,13 @@ public class Mushroom extends Item{
     @Override
     public void use(Panda panda) {
         destroy();
+        if(panda.isBig){
+            manager.aManager.get(manager.powerup).play();
+            Hud.addScore(2000);
+            return;
+        } else {
         manager.aManager.get(manager.powerup).play();
-        panda.grow();
+        panda.grow();}
 
 
     }

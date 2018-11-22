@@ -95,7 +95,7 @@ public class Goomba extends Enemy {
         //create head sensor
         PolygonShape head = new PolygonShape();
         Vector2[] vertice = new Vector2[4];
-        vertice[0] = new Vector2((float)-2.5, 8).scl(1/PandaBros.PPM);
+        vertice[0] = new Vector2((float)-4, 8).scl(1/PandaBros.PPM);
         vertice[1] = new Vector2(3, 8).scl(1/PandaBros.PPM);
         vertice[2] = new Vector2(2, 3).scl(1/PandaBros.PPM);
         vertice[3] = new Vector2(2, 3).scl(1/PandaBros.PPM);

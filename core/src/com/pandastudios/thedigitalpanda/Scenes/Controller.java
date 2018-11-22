@@ -34,6 +34,7 @@ public class Controller {
     public boolean isRightPressed() {
         return rightPressed;
     }
+    long lastTap = System.currentTimeMillis();
 
     public void resize(int width, int height){
         viewPort.update(width, height);

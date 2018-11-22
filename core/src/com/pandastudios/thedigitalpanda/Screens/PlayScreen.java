@@ -136,10 +136,16 @@ public class PlayScreen implements Screen{
 
     }
 
+    int jumps = 0;
+    int maxJumps = 1;
+
     private void handleinput(float dt){
 
-        if(controller.isUpPressed() || controller.isbPressed() && playerPanda.b2Body.getLinearVelocity().y <=0) {
-            playerPanda.b2Body.applyLinearImpulse(new Vector2(0, 0.5f), playerPanda.b2Body.getWorldCenter(), true);
+
+
+        if((controller.isUpPressed() || controller.isbPressed())&& jumps < maxJumps) {
+            playerPanda.b2Body.applyLinearImpulse(new Vector2(0, 3.7f), playerPanda.b2Body.getWorldCenter(), true);
+            jumps++;
         }
         if(controller.isRightPressed() && playerPanda.b2Body.getLinearVelocity().x <=2) {
             playerPanda.b2Body.applyLinearImpulse(new Vector2(0.1f, 0), playerPanda.b2Body.getWorldCenter(), true);
@@ -169,6 +175,8 @@ public class PlayScreen implements Screen{
 
         hud.update(dt);
 
+
+
         gamecam.position.x = playerPanda.b2Body.getPosition().x;
 
         gamecam.update();
@@ -180,6 +188,10 @@ public class PlayScreen implements Screen{
 
         //separate our update logic from render
         update(delta);
+
+        if(playerPanda.b2Body.getLinearVelocity().y == 0)
+            jumps = 0;
+
 
         //clear the game screen with black
         Gdx.gl.glClearColor(1,0,0,1);
