@@ -20,7 +20,7 @@ import com.pandastudios.thedigitalpanda.Sprites.Enemies.Turtle;
 import com.pandastudios.thedigitalpanda.Tools.Manager;
 
 public class Panda extends Sprite {
-    public enum State {FALLING, JUMPING, STANDING, RUNNING, GROWING, RIP }
+    public enum State {FALLING, JUMPING, STANDING, RUNNING, GROWING, RIP, WIN }
     public State currentState;
     private State previousState;
     public World world;
@@ -42,6 +42,7 @@ public class Panda extends Sprite {
     private boolean timeToDefineBigPanda;
     private boolean timeToRedefinePanda;
     private boolean pandaIsRIP;
+    private boolean pandaWins;
     private boolean timeToDefineGodMode;
 
 
@@ -110,7 +111,7 @@ public class Panda extends Sprite {
 
 
     private State getState(){
-        if (pandaIsRIP)
+        if (pandaIsRIP || b2Body.getPosition().y < 0)
             return State.RIP;
         else if (runGrowAnimation)
             return State.GROWING;
@@ -120,6 +121,8 @@ public class Panda extends Sprite {
             return State.FALLING;
         else if (b2Body.getLinearVelocity().x !=0)
             return State.RUNNING;
+        else if (pandaWins)
+            return State.WIN;
         else
             return State.STANDING;
     }
@@ -175,6 +178,10 @@ public class Panda extends Sprite {
         setBounds(getX(), getY(), getWidth(), getHeight() + 12/PandaBros.PPM);
     }
 
+    public void setPandaWins(){
+        pandaWins = true;
+    }
+
     public void hit(Enemy enemy){
         if (enemy instanceof Turtle && ((Turtle)enemy).currentState == Turtle.State.STANDING_SHELL){
             ((Turtle)enemy).kick(this.getX() <= enemy.getX() ? Turtle.KICK_RIGHT : Turtle.KICK_LEFT);
@@ -195,6 +202,9 @@ public class Panda extends Sprite {
     public float getStateTimer() {
         return stateTimer;
     }
+
+    public boolean isWon(){return pandaWins;}
+
 
     private void die() {
         if (!isRIP()) {
@@ -252,6 +262,7 @@ public class Panda extends Sprite {
             PandaBros.OBJECT_BIT |
             PandaBros.WIN_BIT |
             PandaBros.ENEMY_HEAD_BIT|
+            PandaBros.WIN_BIT |
             PandaBros.ITEM_BIT;
 
     fDef.shape = shape;
@@ -327,6 +338,7 @@ public class Panda extends Sprite {
                 PandaBros.COIN_BIT |
                 PandaBros.ENEMY_BIT |
                 PandaBros. ENEMY_HEAD_BIT|
+                PandaBros.WIN_BIT |
                 PandaBros.ITEM_BIT;
 
 

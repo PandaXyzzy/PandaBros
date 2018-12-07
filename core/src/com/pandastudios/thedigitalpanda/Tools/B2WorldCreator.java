@@ -17,6 +17,7 @@ import com.pandastudios.thedigitalpanda.Sprites.TileObjects.Brick;
 import com.pandastudios.thedigitalpanda.Sprites.TileObjects.Coin;
 import com.pandastudios.thedigitalpanda.PandaBros;
 import com.pandastudios.thedigitalpanda.Sprites.Enemies.Goomba;
+import com.pandastudios.thedigitalpanda.Sprites.TileObjects.Win;
 
 public class B2WorldCreator {
     private Array<Goomba> goombas;
@@ -65,6 +66,12 @@ public class B2WorldCreator {
         for(MapObject object : map.getLayers().get(5).getObjects().getByType(RectangleMapObject.class)){
 
             new Brick(screen, object, manager);
+        }
+
+        //create win bodies
+        for(MapObject object : map.getLayers().get(8).getObjects().getByType(RectangleMapObject.class)){
+
+            new Win(screen, object, manager);
         }
 
         //create coin bodies

@@ -18,12 +18,14 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.pandastudios.thedigitalpanda.Scenes.Controller;
 import com.pandastudios.thedigitalpanda.Scenes.GameOverScreen;
 import com.pandastudios.thedigitalpanda.Scenes.Hud;
+import com.pandastudios.thedigitalpanda.Scenes.WinScreen;
 import com.pandastudios.thedigitalpanda.Sprites.Enemies.Enemy;
 import com.pandastudios.thedigitalpanda.Sprites.Items.Item;
 import com.pandastudios.thedigitalpanda.Sprites.Items.ItemDef;
 import com.pandastudios.thedigitalpanda.Sprites.Items.Mushroom;
 import com.pandastudios.thedigitalpanda.Sprites.Panda;
 import com.pandastudios.thedigitalpanda.PandaBros;
+import com.pandastudios.thedigitalpanda.Sprites.TileObjects.Win;
 import com.pandastudios.thedigitalpanda.Tools.B2WorldCreator;
 import com.pandastudios.thedigitalpanda.Tools.Manager;
 import com.pandastudios.thedigitalpanda.Tools.WorldContactListener;
@@ -35,7 +37,6 @@ public class PlayScreen implements Screen{
     private PandaBros game;
     private Manager manager;
     private TextureAtlas atlas;
-    public static boolean alreadyDestroyed = false;
 
     //basic playscreen variables
     private OrthographicCamera gamecam;
@@ -201,7 +202,7 @@ public class PlayScreen implements Screen{
         renderer.render();
 
         //renderer our box2dDebuglines
-        b2dr.render(world, gamecam.combined);
+        //b2dr.render(world, gamecam.combined);
         game.batch.setProjectionMatrix(gamecam.combined);
 
         game.batch.begin(); //start drawing
@@ -217,12 +218,19 @@ public class PlayScreen implements Screen{
         hud.stage.draw();
         controller.draw();
 
+        if (playerPanda.currentState == Panda.State.WIN){
+            game.setScreen(new WinScreen(game));
+            dispose();
+        }
+
         if (gameOver()){
             game.setScreen(new GameOverScreen(game));
             dispose();
         }
 
     }
+
+
 
     public boolean gameOver() {
         if (playerPanda.currentState == Panda.State.RIP && playerPanda.getStateTimer() > 3) {

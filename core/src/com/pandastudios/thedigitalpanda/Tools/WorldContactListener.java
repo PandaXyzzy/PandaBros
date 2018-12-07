@@ -23,6 +23,7 @@ public class WorldContactListener implements ContactListener {
         switch (cDef){
             case PandaBros.PANDA_HEAD_BIT | PandaBros.BRICK_BIT:
             case PandaBros.PANDA_HEAD_BIT | PandaBros.COIN_BIT:
+            case PandaBros.PANDA_BIT | PandaBros.WIN_BIT:
                 if (fixA.getFilterData().categoryBits == PandaBros.PANDA_HEAD_BIT)
                     ((InteractiveTileObject) fixB.getUserData()).onHeadHit((Panda) fixA.getUserData());
                 else
@@ -63,10 +64,6 @@ public class WorldContactListener implements ContactListener {
                     ((Item)fixA.getUserData()).use((Panda) fixB.getUserData());
                 else ((Item)fixB.getUserData()).use((Panda) fixA.getUserData());
                 break;
-
-
-
-
         }
 
     }

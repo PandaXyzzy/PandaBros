@@ -155,7 +155,7 @@ public class Controller {
             }
         });
 
-        table.debug();
+        //table.debug();
 
         table.add();
         table.add(upImg).size(upImg.getWidth(), upImg.getHeight());
